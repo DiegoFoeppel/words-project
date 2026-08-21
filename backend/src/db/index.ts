@@ -1,0 +1,7 @@
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { pgSchema } from "drizzle-orm/pg-core";
+
+export const table = pgSchema("german_words");
+
+export const db = drizzle(process.env.DATABASE_URL!);
