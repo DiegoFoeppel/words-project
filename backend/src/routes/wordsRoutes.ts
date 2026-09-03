@@ -2,19 +2,19 @@ import { Router } from "express";
 import {
   getAll,
   getById,
-  createSentence,
-  editSentence,
-  deleteSentence,
+  addWord,
+  editWord,
+  deleteWord,
   getByFilter,
 } from "../controllers/wordsController";
 
 const router = Router();
 
 router.get("/", getAll);
-router.get("/:id", getById);
 router.get("/filter", getByFilter);
-router.post("/", createSentence);
-router.put("/:id", editSentence);
-router.delete("/:id", deleteSentence);
+router.get("/:id", getById);
+router.patch("/:id", editWord);
+router.post("/", addWord);
+router.delete("/:id", deleteWord);
 
 export default router;

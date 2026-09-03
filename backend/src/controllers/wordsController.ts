@@ -1,4 +1,4 @@
-import { db } from "../db";
+import { db, mySchema } from "../db";
 
 import { Request, Response } from "express";
 import { learning } from "../db/schema";
@@ -8,7 +8,7 @@ export const getAll = async (req: Request, res: Response) => {
   try {
     const response = await db.select().from(learning);
 
-    return res.status(200).json(response);
+    return res.status(200).json({ words: response });
   } catch (err) {
     return res.status(400).json({ message: err });
   }
@@ -37,38 +37,47 @@ export const getById = async (req: Request, res: Response) => {
 
 export const getByFilter = async (req: Request, res: Response) => {
   try {
-    const { word, sentence } = req.params;
+    const { word, sentence } = req.query;
 
-    const wordFilter = `%${word}%`;
+    console.log("quer", req.query);
 
-    const [result] = await db
-      .select()
-      .from(learning)
-      .where(like(learning.word, wordFilter));
+    let query: string = `select * from german_words.learning `;
+    // let params = [];
 
-    if (!word) {
-      return res
-        .status(404)
-        .json({ message: "Couldnt find the sentence. Provide a valid ID" });
+    if (word) {
+      query += `where word like '%${word}%'`;
+      //   params.push(word);
     }
 
-    return res.status(200).json(res);
+    if (sentence) {
+      query += `where sentence like '%${sentence}%'`;
+      //   params.push(sentence);
+    }
+
+    const result = await db.execute(query);
+
+    console.log(result);
+
+    return res.status(200).json({ words: result.rows });
   } catch (err) {
     return res.status(400).json({ message: err });
   }
 };
 
-export const createSentence = async (req: Request, res: Response) => {
+export const addWord = async (req: Request, res: Response) => {
   try {
-    const { word, sentence } = req.body;
+    const { word, sentence, source, status } = req.body;
 
     if (!word) {
       return res.status(400).json({ message: "Word is needed" });
     }
 
-    const response = await db
-      .insert(learning)
-      .values({ word: word, sentence: sentence ?? null });
+    const response = await db.insert(learning).values({
+      word: word,
+      sentence: sentence ?? null,
+      source: source ?? null,
+      status,
+    });
 
     return res.status(200).json(response);
   } catch (err) {
@@ -76,26 +85,35 @@ export const createSentence = async (req: Request, res: Response) => {
   }
 };
 
-export const editSentence = async (req: Request, res: Response) => {
+export const editWord = async (req: Request, res: Response) => {
   try {
-    const { id } = req.query;
+    const { id } = req.params;
     const { word, sentence } = req.body;
+
+    console.log("teste1", req.body, req.query);
+
+    const data = req.body;
 
     const [item] = await db
       .select()
       .from(learning)
       .where(eq(learning.id, Number(id)));
 
+    console.log("teste2", item);
+
     if (!item) {
       return res
         .status(404)
-        .json({ message: "Couldnt find the sentence. Provide a valid ID" });
+        .json({ message: "Couldnt find the item. Provide a valid ID" });
     }
+
+    console.log("teste", Number(id));
 
     const response = await db
       .update(learning)
-      .set({ word: word, sentence: sentence })
-      .where(eq(learning.id, Number(id)));
+      .set(data)
+      .where(eq(learning.id, Number(id)))
+      .returning({ updatedId: learning.id });
 
     return res.status(200).json(response);
   } catch (err) {
@@ -103,7 +121,7 @@ export const editSentence = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteSentence = async (req: Request, res: Response) => {
+export const deleteWord = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
