@@ -30,6 +30,7 @@ export const getExamples = async (req: Request, res: Response) => {
 
     return res.status(200).json(response);
   } catch (err) {
-    return res.status(400).json({ message: err });
+    console.log("Error deleting word: ", err);
+    return res.status(500).json({ error: "Error on deleting word" });
   }
 };

@@ -1,10 +1,18 @@
 import { Router } from "express";
-import { getAll, getRandomWord } from "../controllers/quizController";
+import {
+  deleteExample,
+  getAll,
+  getRandomWord,
+  getWordById,
+  updateExample,
+} from "../controllers/quizController";
 
 const router = Router();
 
 router.get("/", getAll);
 router.get("/random", getRandomWord);
-// router.get("/filter", getByFilter);
+router.get("/:id", getWordById);
+router.patch("/:id", updateExample);
+router.delete("/:id", deleteExample);
 
 export default router;

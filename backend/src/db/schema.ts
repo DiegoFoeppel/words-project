@@ -36,6 +36,8 @@ export const frequentWords = mySchema.table("words", {
   id: serial("id").primaryKey(),
   german: text("german"),
   english: text("english"),
+  sentence: text("sentence"),
+  translation: text("translation"),
 });
 
 export const sentences = mySchema.table("sentences", {

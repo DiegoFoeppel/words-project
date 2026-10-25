@@ -10,7 +10,8 @@ export const getAll = async (req: Request, res: Response) => {
 
     return res.status(200).json({ words: response });
   } catch (err) {
-    return res.status(400).json({ message: err });
+    console.log("Error on getting all sentences", err);
+    return res.status(500).json({ error: "Error on getting all words" });
   }
 };
 
@@ -29,7 +30,19 @@ export const getById = async (req: Request, res: Response) => {
         .json({ message: "Couldnt find the sentence. Provide a valid ID" });
     }
 
-    return res.status(200).json(sentence);
+    // const { english, translation, ...rest } = sentence;
+
+    // console.log("neg", english, translation, rest);
+
+    // const result = {
+    //   ...rest,
+    //   english: english ?? undefined,
+    //   translation: translation ?? undefined,
+    // };
+
+    // console.log("neg2", result);
+
+    return res.status(200).json(result);
   } catch (err) {
     return res.status(400).json({ message: err });
   }
@@ -140,6 +153,7 @@ export const deleteWord = async (req: Request, res: Response) => {
 
     return res.status(200).json({ message: "Sentence deleted" });
   } catch (err) {
-    return res.status(400).json({ message: err });
+    console.log("Error on getting all sentences", err);
+    return res.status(500).json({ error: "Error on getting all words" });
   }
 };
