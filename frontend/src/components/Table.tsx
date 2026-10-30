@@ -20,16 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { WordProps } from "@/types";
 import BadgeStatus from "./BadgeStatus";
-import { toast } from "@/components/ui/toast";
 
 export function TableDemo({ words, onDelete, onEdit }: WordProps) {
-  function deleteToast(word: string) {
-    toast.add({
-      title: "Palavra removida",
-      description: `Palavra ${word} foi deletada da lista.`,
-    });
-  }
-
   return (
     <Table className='mx-auto w-full '>
       {/* <TableCaption className=''>Lista de palavras aprendidas.</TableCaption> */}
@@ -71,13 +63,13 @@ export function TableDemo({ words, onDelete, onEdit }: WordProps) {
                   }
                 />
                 <DropdownMenuContent align='end'>
-                  <DropdownMenuItem onClick={() => onEdit(w)}>
+                  <DropdownMenuItem onClick={() => onEdit(w.id)}>
                     Editar
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant='destructive'
-                    onClick={() => (onDelete(w.id), deleteToast(w.word))}
+                    onClick={() => onDelete(w)}
                   >
                     Deletar
                   </DropdownMenuItem>

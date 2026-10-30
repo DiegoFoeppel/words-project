@@ -15,12 +15,13 @@ import type z from "zod";
 
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { toast } from "./ui/toast";
 
 function Home() {
   const [count, setCount] = useState(0);
   const [words, setWords] = useState<Word[]>([]);
   const [open, setOpen] = useState(false);
-  const [word, setWord] = useState<Word | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Partial<Word> | null>(null);
 
   const [search, setSearch] = useState("");
 
@@ -45,16 +46,13 @@ function Home() {
     fetchWords();
   }, []);
 
-  const handleDelete = async (id: Number) => {
-    console.log("id", id);
-
+  const deleteItem = async (id: Number) => {
     try {
       if (!id) {
         return;
       }
 
-      const response = await deleteWord(id);
-      console.log("response", response);
+      await deleteWord(id);
 
       fetchWords();
     } catch (err) {
@@ -62,37 +60,30 @@ function Home() {
     }
   };
 
-  const handleEdit = async (item: Word) => {
+  const handleEdit = async (wordId: number) => {
     setOpen(true);
 
-    console.log("cliquei editar", item);
+    // console.log("cliquei editar", item);
+    const word = words.find((word) => word.id === wordId);
 
-    const formData = {
-      ...item,
-      english: item.english ?? undefined,
-      translation: item.translation ?? undefined,
-    };
+    console.log("word", word);
 
-    if (!item) return;
-
-    setWord(formData);
-  };
-
-  const handleEditSubmit = async () => {
     if (!word) return;
 
-    console.log("data 2", word);
-
-    try {
-      const response = await editWord(word);
-
-      console.log("response", response);
-
-      fetchWords();
-    } catch (err) {
-      console.log("err", err);
-    }
+    setSelectedItem(word);
   };
+
+  const handleDelete = (word: Word) => {
+    deleteItem(word.id);
+    deleteToast(word.word);
+  };
+
+  function deleteToast(word: string) {
+    toast.add({
+      title: "Palavra removida",
+      description: `Palavra ${word} foi deletada da lista.`,
+    });
+  }
 
   return (
     <div className='mx-4 p-4'>
@@ -100,7 +91,10 @@ function Home() {
         <div className='flex gap-4'>
           <Form
             onSuccess={fetchWords}
-            mode='add'
+            open={open}
+            onOpenChange={() => setOpen((prev) => !prev)}
+            resetWord={() => setSelectedItem(null)}
+            selectedItem={selectedItem}
             // isOpen={isOpen}
             // onChange={handleOpen}
           />
@@ -114,15 +108,6 @@ function Home() {
         </div>
         <ModeToggle />
       </div>
-
-      <Form
-        onSuccess={fetchWords}
-        mode='edit'
-        open={open}
-        onOpenChange={() => setOpen((prev) => !prev)}
-        selectedItem={word}
-        // onSubmit={handleEditSubmit}
-      />
 
       <TableDemo
         words={filteredWords}

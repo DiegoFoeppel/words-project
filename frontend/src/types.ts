@@ -31,6 +31,6 @@ export type Word = {
 
 export type WordProps = {
   words: Word[];
-  onDelete: (id: Number) => void;
-  onEdit: (word: Word) => void;
+  onDelete: (word: Word) => void;
+  onEdit: (wordId: number) => void;
 };

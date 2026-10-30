@@ -23,8 +23,10 @@ export const addWord = async (data) => {
   return res.data;
 };
 
-export const editWord = async (data) => {
-  const res = await api.patch(baseEndpoint, data);
+export const editWord = async (id: number, data) => {
+  console.log("Id", id, data);
+  const res = await api.patch(`${baseEndpoint}/${id}`, data);
+  console.log("res", res);
   return res.data;
 };
 

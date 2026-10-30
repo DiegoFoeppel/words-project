@@ -25,7 +25,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { LearningStatus, type Word } from "@/types";
-import { addWord } from "@/services/wordService";
+import { addWord, editWord } from "@/services/wordService";
 
 const status = z.enum(LearningStatus);
 
@@ -57,8 +57,8 @@ type Props = {
   onSuccess: () => void;
   mode: string;
   open?: boolean;
-  onOpenChange?: (value: boolean) => void;
-  word: Word;
+  onOpenChange: () => void;
+  selectedItem: Word;
 
   // isOpen: boolean;
   // onChange: (value: boolean) => void;
@@ -68,7 +68,7 @@ type Props = {
 const emptyValues: z.infer<typeof formSchema> = {
   word: "",
   status: "new",
-  sentence: "teste",
+  sentence: "",
   source: "",
   english: "",
   translation: "",
@@ -80,79 +80,67 @@ export function Form({
   open,
   onOpenChange,
   selectedItem,
+  resetWord,
 }: Props) {
-  const isEdit = mode === "edit";
-
   const {
     handleSubmit,
     control,
     reset,
-    formState,
     formState: { isSubmitSuccessful },
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: emptyValues,
+    values: selectedItem ?? emptyValues,
   });
 
-  React.useEffect(() => {
-    if (selectedItem) {
-      // Se o estado existir, preenche o formulário com os dados novos
-      reset(selectedItem);
-    } else {
-      // Se o estado for nulo/vazio, limpa o formulário de volta ao padrão
-      reset(emptyValues);
-    }
-  }, [selectedItem, reset]);
-
-  console.log("def", selectedItem);
-
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log("data", data);
-    if (!data) return;
-
     try {
-      const response = await addWord(data);
+      if (selectedItem) {
+        await editWord(selectedItem.id, data);
+      } else {
+        await addWord(data);
+      }
 
-      console.log("response", response);
-
+      reset(emptyValues);
       onSuccess();
-
-      reset({
-        word: "",
-        status: "new",
-        sentence: "",
-        source: "",
-      });
+      onOpenChange();
 
       toast.add({
-        title: "Palavra adicionada",
-        //   description: "Sunday, December 3 at 9:00 AM",
+        title: `Palavra ${selectedItem ? "editada" : "adicionada"}`,
       });
     } catch (err) {
       console.log("err", err);
     }
   };
 
+  console.log("open", open);
+
+  console.log("selected 2", selectedItem);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <form id='form-rhf-demo' onSubmit={handleSubmit(onSubmit)}>
-        {!isEdit && (
-          <DialogTrigger
-            render={<Button variant='outline'>Adicionar palavra</Button>}
-          />
-        )}
+        {/* {!selectedItem && ( */}
+        <DialogTrigger
+          render={
+            <Button variant='outline' onClick={resetWord}>
+              Adicionar palavra
+            </Button>
+          }
+        />
+        {/* )} */}
         <DialogContent className='sm:max-w-sm'>
           <DialogHeader>
             <DialogTitle>
-              {isEdit ? "Editar palavra" : "Adicionar nova palavra"}
+              {selectedItem ? "Editar palavra" : "Adicionar nova palavra"}
             </DialogTitle>
             <DialogDescription>
-              {isEdit
+              {selectedItem
                 ? "Modifique algum campo do formulário."
                 : "Adicione uma palavra que tenha visto e uma frase de exemplo."}
             </DialogDescription>
           </DialogHeader>
-          <FieldGroup>
+          <FieldGroup className='mt-4 mb-8'>
             <Controller
               name='word'
               control={control}
@@ -203,6 +191,7 @@ export function Form({
                   </FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ""}
                     id='form-rhf-demo-source'
                     aria-invalid={fieldState.invalid}
                     // placeholder='Login button not working on mobile'
@@ -243,6 +232,7 @@ export function Form({
                   </FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ""}
                     id='form-rhf-demo-translation'
                     aria-invalid={fieldState.invalid}
                     // placeholder='Login button not working on mobile'
@@ -256,9 +246,15 @@ export function Form({
             />
           </FieldGroup>
           <DialogFooter>
-            <DialogClose render={<Button variant='outline'>Cancelar</Button>} />
+            <DialogClose
+              render={
+                <Button variant='outline' onClick={() => reset()}>
+                  Cancelar
+                </Button>
+              }
+            />
             <Button type='submit' form='form-rhf-demo'>
-              {isEdit ? "Salvar alterações" : "Adicionar palavra"}
+              {selectedItem ? "Salvar alterações" : "Adicionar palavra"}
             </Button>
           </DialogFooter>
         </DialogContent>
