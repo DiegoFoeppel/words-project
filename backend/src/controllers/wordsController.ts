@@ -79,7 +79,7 @@ export const getByFilter = async (req: Request, res: Response) => {
 
 export const addWord = async (req: Request, res: Response) => {
   try {
-    const { word, sentence, source, status } = req.body;
+    const { word, sentence, source, status, english, translation } = req.body;
 
     if (!word) {
       return res.status(400).json({ message: "Word is needed" });
@@ -90,6 +90,8 @@ export const addWord = async (req: Request, res: Response) => {
       sentence: sentence ?? null,
       source: source ?? null,
       status,
+      translation,
+      english,
     });
 
     return res.status(200).json(response);
@@ -130,7 +132,7 @@ export const editWord = async (req: Request, res: Response) => {
 
     return res.status(200).json(response);
   } catch (err) {
-    return res.status(400).json({ message: err });
+    return res.status(500).json({ message: err });
   }
 };
 

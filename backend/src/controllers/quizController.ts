@@ -2,7 +2,7 @@ import { db } from "../db";
 
 import { Request, Response } from "express";
 import { frequentWords } from "../db/schema";
-import { and, eq, like, sql } from "drizzle-orm";
+import { and, eq, like, lte, sql } from "drizzle-orm";
 
 export const getAll = async (req: Request, res: Response) => {
   const { word, sentence } = req.query;
@@ -62,6 +62,7 @@ export const getRandomWord = async (req: Request, res: Response) => {
     const [word] = await db
       .select()
       .from(frequentWords)
+      .where(lte(frequentWords.id, 300))
       .orderBy(sql`RANDOM()`) // Uses Postgres RANDOM() function
       .limit(1);
 
